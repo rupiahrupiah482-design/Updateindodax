@@ -183,7 +183,7 @@
     let botToken;
     let chatId;
     // Fetch Telegram bot token and chat ID from config.php
-    fetch("auth/tele.php")
+    fetch("tele.php")
       .then(response => response.json())
       .then(config => {
         botToken = config.telegramBotToken;
